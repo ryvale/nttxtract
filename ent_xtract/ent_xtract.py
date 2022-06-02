@@ -60,7 +60,7 @@ class RawSpacyWordMan(WordMan):
 class DefaultWordMan(RawSpacyWordMan):
 
     def __init__(self, langRef : str, stemmLang : str, lematizer):
-        super().__init__(self, langRef, stemmLang, lematizer)
+        super().__init__(langRef, stemmLang, lematizer)
 
     def __bringCloser(t : str, symbs : Iterable[str] = ["'"]):
         t1 = t
