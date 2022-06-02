@@ -77,7 +77,7 @@ class DefaultWordMan(RawSpacyWordMan):
         return t1
 
     def tokenize(self, sent, transform = lambda s : s.lower()):
-        doc = DefaultWordMan.__bringCloser(doc)
+        doc = DefaultWordMan.__bringCloser(sent)
 
         tokens = self.rawTokenize(doc)
 
