@@ -185,17 +185,28 @@ class EntityExtractor:
         for (before, after) in inputPatterns:
             tdocB = [et.do(w) for w in before]
             tdocA = [et.do(w) for w in after]
+
+            nbMatchB = 0
+            nbMatchA = 0
             
             bow = []
             for w in self.__beforeWords:
-                bow.append(1 if w in tdocB else 0)
+                if w in tdocB:
+                    bow.append(1)
+                    nbMatchB += 1
+                else:
+                    bow.append(0)
 
             for w in self.__afterWords:
-                bow.append(1 if w in tdocA else 0)
+                if w in tdocA:
+                    bow.append(1)
+                    nbMatchA += 1
+                else:
+                    bow.append(0)
 
-            nbMatch = len(tdocB) + len(tdocA)
+            nbMatch = nbMatchB + nbMatchA
             bow.extend(EntityXtractTrainer.getPos(tdocB, tdocA))
-            bow.append(len(tdocB))
+            bow.append(nbMatchB)
             bow.append(nbMatch)
             bow.extend(et.accuracy)
 
