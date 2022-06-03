@@ -108,6 +108,8 @@ class EntityExtractor:
         if et is None: et = EntityXtractTrainer.ET_IDENTITY
     
         tRef = [et.do(w) for w in ref]
+
+        print(tRef)
         
         for r in test:
             if not (et.do(r) in tRef):return False
@@ -146,6 +148,12 @@ class EntityExtractor:
         self.__beforeWords = beforeWords
         self.__afterWords = afterWords
         self.__namePosDict = namePosDict
+
+
+    def __get_namePosDict(self):
+        return self.__namePosDict
+
+    namePosDict = property(__get_namePosDict)
 
     def __buildInputPatterns(self, tokens, maxWordLength = None):
         nbTokens = len(tokens)
