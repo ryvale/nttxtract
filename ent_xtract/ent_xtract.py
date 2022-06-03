@@ -282,6 +282,16 @@ class EntityXtractTrainer:
         self.__ET_STEM = EXtraTransformer([0, 1], lambda str : self.__wordMan.stem(str))
         self.__ET_LEM = EXtraTransformer([1, 0], lambda str : self.__wordMan.lemmatize(str))
 
+    def __get_ET_LEM(self):
+        return self.__ET_LEM
+
+    ET_LEM = property(__get_ET_LEM)
+
+    def __get_ET_STEM(self):
+        return self.__ET_STEM
+
+    ET_STEM = property(__get_ET_STEM)
+
     def __estimator(self, inputShape, outputShape):
         model = Sequential()
         model.add(Dense(128, input_shape=inputShape, activation="relu"))
