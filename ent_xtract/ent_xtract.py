@@ -109,11 +109,9 @@ class EntityExtractor:
     
         tRef = [et.do(w) for w in ref]
 
-        print(tRef)
-        
         for r in test:
             if not (et.do(r) in tRef):return False
-            
+        
         return True
 
     def disorderedPerfectTokensMatch(ref, test, et = None) -> bool:
@@ -255,12 +253,12 @@ class EntityExtractor:
                     match = 1
                     break
 
-            if match < 0: continue
+                if match < 0: continue
 
-            name = EntityExtractor.extractName(tokens, len(inputPatterns[eidx][0]), npClass['namePos'][1] + (len(inputPatterns[eidx][1]) - len(aft)))
+                name = EntityExtractor.extractName(tokens, len(inputPatterns[eidx][0]), npClass['namePos'][1] + (len(inputPatterns[eidx][1]) - len(aft)))
 
-            if name is None or name == "": continue
-            yPreds0.append((idx, res, name, eidx))
+                if name is None or name == "": continue
+                yPreds0.append((idx, res, name, eidx))
 
         yPreds0.sort(key=lambda x:x[1], reverse=True)
 
