@@ -342,6 +342,8 @@ class EntityXtractTrainer:
 
         lastClassNum = 1
 
+        classesDict["0"] = 0
+
         exps = jsonData['expresions']
 
         for sentenceConfig in exps:
