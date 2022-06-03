@@ -140,12 +140,13 @@ class EntityExtractor:
     def extractName(tokens, np1:int, np2 :int) -> str:
         return tokens[np1: len(tokens) - np2 - 1]
 
-    def __init__(self, estimator, wordMan, beforeWords, afterWords, namePosDict):
+    def __init__(self, estimator, wordMan, beforeWords, afterWords, negationWords, namePosDict):
         self.__estimator = estimator
         self.__wordMan = wordMan
         self.__beforeWords = beforeWords
         self.__afterWords = afterWords
         self.__namePosDict = namePosDict
+        self.__negationWords = negationWords
 
 
     def __get_namePosDict(self):
@@ -196,8 +197,27 @@ class EntityExtractor:
             bow.extend(EntityXtractTrainer.getPos(tdocB, tdocA))
             bow.append(len(tdocB))
             bow.append(nbMatch)
-            
             bow.extend(et.accuracy)
+
+            if self.__negationWords is None:
+                bow.append(0)
+                bow.append(0)
+            else:
+                negB = 0
+                negA = 0
+                for w in self.__negationWords:
+                    if et.do(w) in tdocB:
+                        negB = 1
+                        break
+
+                for w in self.__negationWords:
+                    if et.do(w) in tdocA:
+                        negA = 1
+                        break
+
+                bow.append(negB)
+                bow.append(negA)
+
             
             res.append(bow)
                 
@@ -277,10 +297,11 @@ class EntityXtractTrainer:
 
     ET_IDENTITY = EXtraTransformer([0, 0], lambda str : str)
 
-    def __init__(self, wordMan = DefaultWordMan("fr_core_news_sm", "french", WordNetLemmatizer())):
+    def __init__(self, wordMan = DefaultWordMan("fr_core_news_sm", "french", WordNetLemmatizer()), negationWords = None):
         self.__wordMan = wordMan
         self.__ET_STEM = EXtraTransformer([0, 1], lambda str : self.__wordMan.stem(str))
         self.__ET_LEM = EXtraTransformer([1, 0], lambda str : self.__wordMan.lemmatize(str))
+        self.__negationWords = negationWords
 
     def __get_ET_LEM(self):
         return self.__ET_LEM
@@ -338,6 +359,27 @@ class EntityXtractTrainer:
         features.append(len(tdocB))
         features.append(nbMatch)
         features.extend(et.accuracy)
+
+        if self.__negationWords is None:
+            features.append(0)
+            features.append(0)
+        else:
+            negB = 0
+            negA = 0
+            for w in self.__negationWords:
+                if et.do(w) in tdocB:
+                    negB = 1
+                    break
+
+            for w in self.__negationWords:
+                if et.do(w) in tdocA:
+                    negA = 1
+                    break
+
+            features.append(negB)
+            features.append(negA)
+        
+            
     
         outputRow = [0] * len(self.__classes)
         outputRow[self.__classes.index(docY[idx])] = 1
@@ -430,4 +472,4 @@ class EntityXtractTrainer:
 
         model.fit(x=trainX, y=trainY, epochs=epochs)
 
-        return EntityExtractor(model, self.__wordMan, self.__beforeWords, self.__afterWords, namePosDict)
+        return EntityExtractor(model, self.__wordMan, self.__beforeWords, self.__afterWords, self.__negationWords, namePosDict)
