@@ -105,7 +105,7 @@ class EntityExtractor:
 
     def disorderedPartialPerfectTokensMatch(ref, test, et = None) -> bool:
 
-        if et is None: et = EntityXtractTrainer.__ET_IDENTITY
+        if et is None: et = EntityXtractTrainer.ET_IDENTITY
     
         tRef = [et.do(w) for w in ref]
         
@@ -118,7 +118,7 @@ class EntityExtractor:
         nb = len(ref)
         if nb != len(test) : return False
 
-        if et is None: et = EntityXtractTrainer.__ET_IDENTITY
+        if et is None: et = EntityXtractTrainer.ET_IDENTITY
         
         tTest = [et.do(w) for w in test]
         
@@ -130,7 +130,7 @@ class EntityExtractor:
     def perfectTokensMatch(ref, test, et = None) -> bool:
         if len(ref) != len(test) : return False
 
-        if et is None: et = EntityXtractTrainer.__ET_IDENTITY
+        if et is None: et = EntityXtractTrainer.ET_IDENTITY
         
         for i, r in enumerate(ref):
             if et.do(r) != et.do(test[i]): return False
@@ -171,7 +171,7 @@ class EntityExtractor:
 
     def __buildInputsFromPatterns(self, inputPatterns, et = None):
         if len(inputPatterns) == 0: return []
-        if et is None: et = EntityXtractTrainer.__ET_IDENTITY
+        if et is None: et = EntityXtractTrainer.ET_IDENTITY
         
         res = []
     
@@ -198,7 +198,7 @@ class EntityExtractor:
         return res
 
     def __buildInputsFromTokens(self, tokens, maxNameLength = None, et = None):
-        if et is None: et = EntityXtractTrainer.__ET_IDENTITY
+        if et is None: et = EntityXtractTrainer.ET_IDENTITY
 
         inputPatterns = self.__buildInputPatterns(tokens, maxNameLength)
             
@@ -269,7 +269,7 @@ class EntityExtractor:
 
 class EntityXtractTrainer:
 
-    __ET_IDENTITY = EXtraTransformer([0, 0], lambda str : str)
+    ET_IDENTITY = EXtraTransformer([0, 0], lambda str : str)
 
     def __init__(self, wordMan = DefaultWordMan("fr_core_news_sm", "french", WordNetLemmatizer())):
         self.__wordMan = wordMan
@@ -305,7 +305,7 @@ class EntityXtractTrainer:
     def __getTraingFeature(self, idx, doc, docY : Sequence[object],  et = None):
         features = []
 
-        if et is None: et = EntityXtractTrainer.__ET_IDENTITY
+        if et is None: et = EntityXtractTrainer.ET_IDENTITY
 
         tdocB = [et.do(w) for w in doc[0]]
         tdocA = [et.do(w) for w in doc[1]]
