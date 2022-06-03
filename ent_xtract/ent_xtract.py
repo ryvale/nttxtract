@@ -365,7 +365,7 @@ class EntityXtractTrainer:
             self.__beforeWords.extend(before)
             self.__afterWords.extend(after)
 
-            patternFeature = EntityXtractTrainer.__getPos(before, after)
+            patternFeature = EntityXtractTrainer.getPos(before, after)
 
             docX.append((before, after, patternFeature))
             docY.append(classesDict[classKey])
