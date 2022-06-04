@@ -174,8 +174,10 @@ class EntityExtractor:
 
                 before = tokens[0: idx]
                 after = tokens[idx + nbWordLen: ]
+
+                entityId = tokens[idx: idx + nbWordLen]
                 
-                res.append((before, after))
+                res.append((before, after, entityId))
         
         return res
 
@@ -185,37 +187,37 @@ class EntityExtractor:
         
         res = []
     
-        for (before, after) in inputPatterns:
+        for (before, after, entityId) in inputPatterns:
             tdocB = [et.do(w) for w in before]
             tdocA = [et.do(w) for w in after]
 
             nbMatchB = 0
             nbMatchA = 0
             
-            bow = []
+            features = []
             for w in self.__beforeWords:
                 if w in tdocB:
-                    bow.append(1)
+                    features.append(1)
                     nbMatchB += 1
                 else:
-                    bow.append(0)
+                    features.append(0)
 
             for w in self.__afterWords:
                 if w in tdocA:
-                    bow.append(1)
+                    features.append(1)
                     nbMatchA += 1
                 else:
-                    bow.append(0)
+                    features.append(0)
 
             nbMatch = nbMatchB + nbMatchA
-            bow.extend(EntityXtractTrainer.getPos(tdocB, tdocA))
-            bow.append(nbMatchB)
-            bow.append(nbMatch)
-            bow.extend(et.accuracy)
+            features.extend(EntityXtractTrainer.getPos(tdocB, tdocA))
+            features.append(nbMatchB)
+            features.append(nbMatch)
+            features.extend(et.accuracy)
 
             if self.__negationWords is None:
-                bow.append(0)
-                bow.append(0)
+                features.append(0)
+                features.append(0)
             else:
                 negB = 0
                 negA = 0
@@ -229,11 +231,25 @@ class EntityExtractor:
                         negA = 1
                         break
 
-                bow.append(negB)
-                bow.append(negA)
-
+                features.append(negB)
+                features.append(negA)
             
-            res.append(bow)
+            idInBefore = 0
+            for w in entityId:
+                if w in before:
+                    idInBefore = 1
+                    break
+
+            idInAfter = 0
+            for w in entityId:
+                if w in after:
+                    idInAfter = 1
+                    break
+            
+            features.append(idInBefore)
+            features.append(idInAfter)
+
+            res.append(features)
                 
         return res
 
@@ -393,7 +409,8 @@ class EntityXtractTrainer:
             features.append(negB)
             features.append(negA)
         
-            
+        features.append(0)
+        features.append(0)
     
         outputRow = [0] * len(self.__classes)
         outputRow[self.__classes.index(docY[idx])] = 1
