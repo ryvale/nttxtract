@@ -500,7 +500,7 @@ class EntityXtractTrainer:
         output_shape = (len(trainY[0]))
 
         print("Input size :", input_shape)
-        print("Output size :", input_shape)
+        print("Output size :", output_shape)
 
         model = self.__estimator(input_shape, output_shape)
         adam = tf.keras.optimizers.Adam(learning_rate=0.01, decay=1e-6)
