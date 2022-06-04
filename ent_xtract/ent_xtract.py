@@ -137,6 +137,9 @@ class EntityExtractor:
         
         return True
 
+    def allowAllMatch(ref, test, et = None) -> bool:
+        return True
+
     def extractName(tokens, np1:int, np2 :int) -> str:
         return tokens[np1: len(tokens) - np2 - 1]
 
