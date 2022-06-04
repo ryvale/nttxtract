@@ -305,7 +305,9 @@ class EntityExtractor:
 
                 if match < 0: continue
 
-                name = EntityExtractor.extractName(tokens, len(inputPatterns[eidx][0]), npClass['namePos'][1] + (len(inputPatterns[eidx][1]) - len(aft)))
+                #name = EntityExtractor.extractName(tokens, len(inputPatterns[eidx][0]), npClass['namePos'][1] + (len(inputPatterns[eidx][1]) - len(aft)))
+
+                name = inputPatterns[eidx][2]
 
                 if name is None or name == "": continue
                 yPreds0.append((idx, res, name, eidx))
