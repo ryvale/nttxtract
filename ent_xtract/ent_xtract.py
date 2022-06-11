@@ -108,7 +108,7 @@ class ResponseSelector:
         return " ".join(entitySeq)
 
     def __init__(self, format = None):
-        self.__format = ResponseSelector.concate if format is None else format
+        self._format = ResponseSelector.concate if format is None else format
         pass
     
     def select(self, preds) -> str:
@@ -118,7 +118,7 @@ class ResponseSelector:
         fcls = next(it)
         fentityId = preds[fcls]['entityId']
 
-        return self.__format(fentityId)
+        return self._format(fentityId)
 
 class NoNegSelector(ResponseSelector):
 
@@ -138,7 +138,7 @@ class NoNegSelector(ResponseSelector):
 
             if ko: continue
 
-            return self.__format(fentityId)
+            return self._format(fentityId)
                 
         return None
 
