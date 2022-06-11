@@ -111,14 +111,14 @@ class ResponseSelector:
         self._format = ResponseSelector.concate if format is None else format
         pass
     
-    def select(self, preds) -> str:
+    def select(self, preds):
         if len(preds) == 0 : return None
 
         it = iter(preds)
         fcls = next(it)
         fentityId = preds[fcls]['entityId']
 
-        return self._format(fentityId)
+        return self._format(fentityId), preds[fcls]
 
 class NoNegSelector(ResponseSelector):
 
@@ -138,7 +138,7 @@ class NoNegSelector(ResponseSelector):
 
             if ko: continue
 
-            return self._format(fentityId)
+            return self._format(fentityId), preds[cls]
                 
         return None
 
