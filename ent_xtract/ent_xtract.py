@@ -54,7 +54,7 @@ class RawSpacyWordMan(WordMan):
 
         doc = self.__nlp(sent)
         
-        return [transform(t.text) for t in doc]
+        return [transform(t.text) for t in doc], [t.text for t in doc]
 
     
 class DefaultWordMan(RawSpacyWordMan):
@@ -81,9 +81,9 @@ class DefaultWordMan(RawSpacyWordMan):
 
         tokens = self.rawTokenize(doc)
 
-        if transform is None: return tokens
+        if transform is None: return tokens, tokens
 
-        return [transform(w) for w in tokens]
+        return [transform(w) for w in tokens], tokens
 
 
 class EXtraTransformer:
@@ -100,6 +100,47 @@ class EXtraTransformer:
 
     def do(self, w: str):
         return self.__transform(w)
+
+
+class ResponseSelector:
+
+    def concate(entitySeq : Sequence[str]):
+        return " ".join(entitySeq)
+
+    def __init__(self, format = None):
+        self.__format = ResponseSelector.concate if format is None else format
+        pass
+    
+    def select(self, preds) -> str:
+        if len(preds) == 0 : return None
+
+        it = iter(preds)
+        fcls = next(it)
+        fentityId = preds[fcls]['entityId']
+
+        return self.__format(fentityId)
+
+class NoNegSelector(ResponseSelector):
+
+    def __init__(self, negWords, format=None):
+        super().__init__(format)
+        self.__negWords = negWords
+
+    def select(self, preds) -> str:
+        for cls in preds:
+            fentityId = preds[cls]['entityId']
+            
+            ko = False
+            for w in fentityId:
+                if w in self.__negWords:
+                    ko = True
+                    break
+
+            if ko: continue
+
+            return self.__format(fentityId)
+                
+        return None
 
 class EntityExtractor:
 
@@ -264,9 +305,11 @@ class EntityExtractor:
     def understandMessage(self, text, thresh, et = None, tokensMatch = None):
         if tokensMatch is None : tokensMatch = EntityExtractor.disorderedPartialPerfectTokensMatch
 
-        tokens = self.__wordMan.tokenize(text)
+        tokens, rawTokens = self.__wordMan.tokenize(text)
 
         inputPatterns, gInputs = self.__buildInputsFromTokens(tokens, et = et)
+
+        rawInputPatterns, _ = self.__buildInputsFromTokens(rawTokens, et = et)
 
         yPreds0 = []
     
@@ -307,7 +350,9 @@ class EntityExtractor:
 
                 #name = EntityExtractor.extractName(tokens, len(inputPatterns[eidx][0]), npClass['namePos'][1] + (len(inputPatterns[eidx][1]) - len(aft)))
 
-                name = inputPatterns[eidx][2]
+                #name = inputPatterns[eidx][2]
+
+                name = rawInputPatterns[eidx][2]
 
                 if name is None or name == "": continue
                 yPreds0.append((idx, res, name, eidx))
@@ -324,6 +369,13 @@ class EntityExtractor:
             yPreds1[cls] = { "p" : yp[1], "ip" : yp[3], "entityId" : yp[2] }
             
         return yPreds1, inputPatterns
+
+
+    def selectResult(self, preds, selector = None):
+        if selector is None : selector = NoNegSelector(self.__negationWords)
+        return selector.select(preds)
+
+
 
 class EntityXtractTrainer:
 
@@ -371,7 +423,7 @@ class EntityXtractTrainer:
             
         return patternFeature
 
-    def __getTraingFeature(self, idx, doc, docY : Sequence[object],  et = None):
+    def __getTraingFeatures(self, idx, doc, docY : Sequence[object],  et = None):
         features = []
 
         if et is None: et = EntityXtractTrainer.ET_IDENTITY
@@ -440,7 +492,7 @@ class EntityXtractTrainer:
         for sentenceConfig in exps:
             exp = sentenceConfig['exp']
         
-            tokens = self.__wordMan.tokenize(exp)
+            tokens, _ = self.__wordMan.tokenize(exp)
 
             namePos = sentenceConfig['namePos']
     
@@ -479,13 +531,13 @@ class EntityXtractTrainer:
         training = []
 
         for idx, doc in enumerate(docX):
-            features, outputRow = self.__getTraingFeature(idx, doc, docY)
+            features, outputRow = self.__getTraingFeatures(idx, doc, docY)
             training.append([features, outputRow])
 
-            features, outputRow = self.__getTraingFeature(idx, doc, docY, self.__ET_LEM)
+            features, outputRow = self.__getTraingFeatures(idx, doc, docY, self.__ET_LEM)
             training.append([features, outputRow])
 
-            features, outputRow = self.__getTraingFeature(idx, doc, docY, self.__ET_STEM)
+            features, outputRow = self.__getTraingFeatures(idx, doc, docY, self.__ET_STEM)
             training.append([features, outputRow])
 
         random.shuffle(training)
