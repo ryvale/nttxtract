@@ -142,6 +142,39 @@ class NoNegSelector(ResponseSelector):
                 
         return None
 
+class NoNegNoBASelector(ResponseSelector):
+
+    def __init__(self, negWords, beforeWords, afterWords, format=None):
+        super().__init__(format)
+        self.__negWords = negWords
+        self.__beforeWords = beforeWords
+        self.__afterWords = afterWords
+
+
+    def select(self, preds) -> str:
+        for cls in preds:
+            fentityId = preds[cls]['entityId']
+            
+            ko = False
+            for w in fentityId:
+                if w in self.__negWords:
+                    ko = True
+                    break
+
+                if w in self.__beforeWords:
+                    ko = True
+                    break
+
+                if w in self.__afterWords:
+                    ko = True
+                    break
+
+            if ko: continue
+
+            return self._format(fentityId), cls, preds[cls]
+                
+        return None
+
 class EntityExtractor:
 
     def disorderedPartialPerfectTokensMatch(ref, test, et = None) -> bool:
@@ -372,7 +405,7 @@ class EntityExtractor:
 
 
     def selectResult(self, preds, selector = None):
-        if selector is None : selector = NoNegSelector(self.__negationWords)
+        if selector is None : selector = NoNegNoBASelector(self.__negationWords, self.__beforeWords, self.__afterWords)
         return selector.select(preds)
 
 
