@@ -118,7 +118,7 @@ class ResponseSelector:
         fcls = next(it)
         fentityId = preds[fcls]['entityId']
 
-        return self._format(fentityId), preds[fcls]
+        return self._format(fentityId), fcls, preds[fcls]
 
 class NoNegSelector(ResponseSelector):
 
@@ -138,7 +138,7 @@ class NoNegSelector(ResponseSelector):
 
             if ko: continue
 
-            return self._format(fentityId), preds[cls]
+            return self._format(fentityId), cls, preds[cls]
                 
         return None
 
